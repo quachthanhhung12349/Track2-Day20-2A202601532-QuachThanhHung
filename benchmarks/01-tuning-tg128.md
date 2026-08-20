@@ -23,8 +23,5 @@ LAB_N_THREADS=1 make bench
 
 ## Your explanation (required -- replace this line)
 
-_Where is the knee, and why there? If the peak sits at your physical core count
-and drops above it, say what the extra threads are competing for. If your curve
-does something else -- flat, or still climbing at 2x logical cores -- say that
-instead and reason about why. A result that contradicts the expected shape is
-worth more than one that matches it, as long as you explain it._
+Tôi nghĩ nguyên nhân mà mô hình lại chạy tốt nhất ở 1 luòng là vì: khi chạy trên GPU, cho nên tốc độ decode bị giới hạn bởi GPU và băng thông RAM của GPU. Các nhân CPu khi đó chỉ tăng scheduling overhead, và áp lực lên cache/memory bandwidth của CPU khi điều phối lệnh GPU.
+---

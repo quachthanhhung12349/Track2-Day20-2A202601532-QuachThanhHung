@@ -6,8 +6,8 @@
 >
 > `make verify` sẽ fail nếu còn placeholder chưa điền. Đó là cố ý.
 
-**Họ Tên:** _<Họ Tên>_
-**Cohort:** _<A20-K1 / A20-K2 / ...>_
+**Họ Tên:** _<Quách Thanh Hưng>_
+**Cohort:** _<K4>_
 **Ngày submit:** _<YYYY-MM-DD>_
 
 ---

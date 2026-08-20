@@ -35,6 +35,4 @@ P95 grew no faster than throughput (1.02x vs 3.01x), so this server still has he
 
 ## Your reading (required -- replace this line)
 
-_Where does your server saturate, and what is the evidence? Name the number that
-convinced you. Then say what you would change first to raise goodput at your SLO --
-and why that knob and not another._
+_Server mới bắt đầu saturate, nhưng ta chưa chỉ được server bão hoà ở đâu. Tôi sẽ chạy lâu hơn và thêm các load point >50 đến khi RPS dừng tăng và P95 tăng. Tôi sẽ ddoorii knob --parallel trước nếu tôi có đủ RAM/VRAM, vì vấn đề hiện tại có vẻ là concurrency/queueing với 4 request slots._

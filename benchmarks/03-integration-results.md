@@ -30,6 +30,4 @@ Dominant stage: **llm** (100% of total)
 
 ## Which N16-N19 pieces are real (required -- replace this line)
 
-_List each of N16, N17, N18, N19 as real or stubbed. Stubbing costs no points;
-misrepresenting it does. Then answer: is the dominant stage above what you expected?
-If you had to halve this pipeline's latency, which stage would you attack and why?_
+_Bottleneck ở LLM, hợp với kỳ vọng. Nếu phải giảm latency thì ta phải tập trung vào LLM và cách tối ưu mô hình LLM_

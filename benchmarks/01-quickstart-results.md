@@ -16,6 +16,4 @@ Completed requests: `UD-Q4_K_XL` 10/10 · `UD-Q2_K_XL` 10/10
 
 ## Your observation (required -- replace this line)
 
-_Is the smaller quantization worth it on your machine? Compare the numbers above,
-then judge the answer quality yourself: run `make serve` on each and ask the same
-question twice. Size and speed are measurable; usefulness is your call._
+2 bit nhanh hơn 4 bit khoảng 2 lần khi load model, tuy nhiên khi decode model thì model 4 bit lại cho tốc độ nhanh hơn. Vì máy tôi đủ VRAM -> không nên chạy model 2 bit ở đây.
