@@ -16,23 +16,22 @@
 
 > Từ `make probe`. Paste output hoặc điền tay.
 
-- **OS:** _<macOS 14 / Windows 11 / Ubuntu 24.04 / ...>_
-- **CPU:** _<Apple M2 / Intel i7-12700H / AMD Ryzen 7 5800H>_
-- **Cores:** _<physical / logical>_
-- **CPU extensions:** _<AVX2 / AVX-512 / NEON / —>_
-- **RAM:** _<GB>_
-- **Accelerator:** _<NVIDIA RTX 4060 / Apple Metal / Vulkan / CPU only>_
-- **llama.cpp asset đã tải:** _<vd: llama-b10488-bin-macos-arm64.tar.gz>_
-- **Model đã dùng:** _<Gemma 4 E2B / Qwen3.5 0.8B>_ (`LAB_MODEL=`_<gemma4-e2b / qwen35-0.8b>_)
-- **Quantization:** _<primary>_ + _<compare>_ (từ `models/active.json`)
+- **OS:** Linux 6.8.0-138-generic (x86_64)
+- **CPU:** Intel(R) Core(TM) i5-8300H CPU @ 2.30GHz
+- **Cores:** 4 physical / 8 logical
+- **CPU extensions:** AVX2 (no AVX-512 or NEON)
+- **RAM:** 15.5 GB
+- **Accelerator:** NVIDIA GeForce GTX 1050 (4 GB VRAM), CUDA and Vulkan available
+- **llama.cpp asset đã tải:** source build b10488 with CUDA (`-DGGML_CUDA=ON`)
+- **Model đã dùng:** Gemma 4 E2B (`LAB_MODEL=gemma4-e2b`)
+- **Quantization:** UD-Q4_K_XL + UD-Q2_K_XL (từ `models/active.json`)
 
-**Chạy ở đâu:** _<laptop của tôi / Colab / Kaggle>_
-_(Nếu dùng cloud fallback: nói rõ vì sao — RAM < 8 GB, setup fail, v.v. Không mất điểm.)_
+**Chạy ở đâu:** laptop của tôi (local)
 
 **Setup story** (≤ 80 chữ): điều gì cần thay đổi để lab chạy trên máy bạn? Có bước
 nào fail rồi phải workaround không?
 
-_Answer here._
+Máy local có 15.5 GB RAM, đủ cho Gemma 4 E2B. GTX 1050 4 GB hỗ trợ CUDA và Vulkan; tôi dùng llama.cpp build b10488 với CUDA (`-DGGML_CUDA=ON`) để offload model lên GPU. Không cần cloud fallback.
 
 ---
 
@@ -41,15 +40,15 @@ _Answer here._
 > Paste bảng từ `benchmarks/01-quickstart-results.md` (`make bench` tự sinh).
 
 | Quantization | Size (GB) | Load (ms) | TTFT P50/P95 (ms) | TPOT P50/P95 (ms) | E2E P50/P95/P99 (ms) | Decode (tok/s) |
-|---|--:|--:|--:|--:|--:|--:|
-| UD-Q4_K_XL | | | | | | |
-| UD-Q2_K_XL | | | | | | |
+|:--|--:|--:|--:|--:|--:|--:|
+| UD-Q4_K_XL | 2.97 | 10375 | 380 / 1642 | 33.8 / 34.1 | 2513 / 3761 / 3761 | 29.6 |
+| UD-Q2_K_XL | 2.24 | 5074 | 354 / 2152 | 43.2 / 46.1 | 3066 / 4866 / 4866 | 23.1 |
 
 **Quan sát** (≤ 60 chữ): 2-bit nhanh hơn bao nhiêu, và **có đáng không**? Bạn đã thử
 hỏi cùng một câu trên cả hai (`make serve` vs `.venv/bin/python labs/02-serve/serve.py --compare`)
 chưa? Chất lượng khác nhau thế nào?
 
-_Answer here._
+2 bit nhanh hơn 4 bit khoảng 2 lần khi load model, tuy nhiên khi decode model thì model 4 bit lại cho tốc độ nhanh hơn. Vì máy tôi đủ VRAM -> không nên chạy model 2 bit ở đây.
 
 ---
 
@@ -57,14 +56,13 @@ _Answer here._
 
 > Từ `benchmarks/02-server-results.md` (`make load-report`).
 
-| Users | RPS | P50 (ms) | P95 (ms) | P99 (ms) | Eff. concurrency | Failures |
-|--:|--:|--:|--:|--:|--:|--:|
-| 10 | | | | | | |
-| 50 | | | | | | |
-
-- **Offered load tăng 5×, throughput thực tăng:** _<X.XX>×_
-- **P95 tăng:** _<X.XX>×_
-- **Effective concurrency ở 50 users:** _<số>_ so với `--parallel` = _<số>_ slots
+| Users | Reqs | RPS | P50 (ms) | P95 (ms) | P99 (ms) | Eff. concurrency | Failures |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| 10 | 13 | 0.23 | 31000 | 55000 | 55000 | 8.0 | 0.0% |
+| 50 | 39 | 0.69 | 31000 | 56000 | 56000 | 20.3 | 0.0% |
+- **Offered load tăng 5×, throughput thực tăng:** _<3.01>×_
+- **P95 tăng:** _<1.02>×_
+- **Effective concurrency ở 50 users:** _<20.3>_ so với `--parallel` = _<4>_ slots
 
 **Peak `llamacpp:n_busy_slots_per_decode`** (từ `make metrics` khi `make load-50` đang
 chạy): _<số>_ / _<slots>_ slots
@@ -74,7 +72,7 @@ thuyết phục bạn? Nếu P95 tăng nhanh hơn RPS thì phần latency thêm 
 compute time — bạn biết bằng cách nào? Nếu bạn phải nâng goodput@SLO, bạn sẽ đổi knob
 nào **trước**, và vì sao knob đó?
 
-_Answer here._
+_Server mới bắt đầu saturate, nhưng ta chưa chỉ được server bão hoà ở đâu. Tôi sẽ chạy lâu hơn và thêm các load point >50 đến khi RPS dừng tăng và P95 tăng. Tôi sẽ ddoorii knob --parallel trước nếu tôi có đủ RAM/VRAM, vì vấn đề hiện tại có vẻ là concurrency/queueing với 4 request slots._
 
 ---
 
@@ -84,23 +82,23 @@ _Answer here._
 
 | Day | Piece | Real hay stub? |
 |---|---|---|
-| N16 Cloud/IaC | | |
-| N17 Data pipeline | | |
-| N18 Lakehouse | | |
-| N19 Vector + features | | |
+| N16 Cloud/IaC | | stub |
+| N17 Data pipeline | | stub |
+| N18 Lakehouse | | stub |
+| N19 Vector + features | keyword-overlap retrieval | stub |
 | N20 Serving | `llama-server` | real |
 
 **Latency split** (mean của 3 query, từ output của `pipeline.py`):
 
-- embed: _<ms>_
-- retrieve: _<ms>_
-- llm: _<ms>_
-- **stage chiếm nhiều nhất:** _<stage>_ (_<%>_ của total)
+- embed: _<0.0>_
+- retrieve: _<0.2>_
+- llm: _<1745.5>_
+- **stage chiếm nhiều nhất:** _<llm>_ (_<100%>_ của total)
 
 **Reflection** (≤ 60 chữ): bottleneck ở đâu? Có khớp với kỳ vọng của bạn không? Nếu
 phải giảm latency của pipeline này 2×, bạn sẽ tấn công vào đâu?
 
-_Answer here._
+_Bottleneck ở LLM, hợp với kỳ vọng. Nếu phải giảm latency thì ta phải tập trung vào LLM và cách tối ưu mô hình LLM_
 
 ---
 
@@ -113,9 +111,9 @@ _Answer here._
 **Change:** _<vd: hạ -t từ 16 xuống 8; vd: đổi sang UD-Q2_K_XL; vd: --parallel 4 → 8>_
 
 ```
-before:  <số + đơn vị>
-after:   <số + đơn vị>
-speedup: <X.Y>×
+before:  <-t = 16 -> tg128 = 26.6>
+after:   <-t = 1 -> tg128 = 29,6>
+speedup: <1.11>×
 ```
 
 **Tại sao nó work** (1–2 đoạn — đây là phần grader đọc kỹ nhất):
@@ -125,8 +123,7 @@ memory bandwidth? vector width? cache residency? scheduling? queueing? Nếu k�
 **khác** với kỳ vọng từ deck — nói rõ, và giải thích vì sao. Grader thưởng điểm cho
 lập luận đúng về một kết quả bất ngờ, hơn là một con số đẹp không được giải thích._
 
-_Answer here._
-
+Tôi nghĩ nguyên nhân mà mô hình lại chạy tốt nhất ở 1 luòng là vì: khi chạy trên GPU, cho nên tốc độ decode bị giới hạn bởi GPU và băng thông RAM của GPU. Các nhân CPu khi đó chỉ tăng scheduling overhead, và áp lực lên cache/memory bandwidth của CPU khi điều phối lệnh GPU.
 ---
 
 ## 6. Bonus  *(optional — tối đa 20 điểm)*
